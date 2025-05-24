@@ -26,6 +26,8 @@ var
 	MetaOrgNode : TDOMNode;
 	AuthorsNode : TDOMNode;
 
+	TocNode : TDOMNode;
+
 	(* These 4 nodes are used temporary *)
 	AuthorNode : TDOMNode;
 	NameNode : TDOMNode;
@@ -35,7 +37,7 @@ var
 	LineN : Integer;
 	PageN : Integer;
 
-	SectionN : Array[1..5] of Integer;
+	SectionN : Array[1..10] of Integer;
 
 	TempNode : TDOMNode;
 	TempContentNode : TDOMNode;
@@ -46,6 +48,21 @@ var
 	AtStr2 : String;
 
 	FirstTime : Boolean;
+
+	Buffer : String;
+
+	HaveToc : Boolean;
+	
+	TocCount : Integer;
+
+	TocPrefix : String;
+
+	TocRegExpr : TRegExpr;
+
+procedure AddLine(S : String);
+begin
+	Buffer := Buffer + S + NL;
+end;
 
 procedure OutputStr(S : String); forward;
 
@@ -59,9 +76,9 @@ begin
 	S := '[Page ' + IntToStr(PageN) +']';
 	for I := 1 to (PaperHeight - LineN) do
 	begin
-		WriteLn('');
+		AddLine('');
 	end;
-	WriteLn(String(AuthorsNode.TextContent) + StringOfChar(' ', PaperWidth - Length(S) - Length(AuthorsNode.TextContent)) + S);
+	AddLine(String(AuthorsNode.TextContent) + StringOfChar(' ', PaperWidth - Length(S) - Length(AuthorsNode.TextContent)) + S);
 	LineN := 0;
 
 	if HaveTitle then
@@ -83,7 +100,7 @@ end;
 
 procedure OutputStr(S : String);
 begin
-	WriteLn(S);
+	AddLine(S);
 	Inc(LineN);
 	if LineN = PaperHeight then
 	begin
@@ -185,6 +202,7 @@ var
 	J : Integer;
 	B : Boolean;
 	S : String;
+	IncrAmount : Integer;
 begin
 	Indent := InitialIndent + PaddingLeft;
 
@@ -225,7 +243,12 @@ begin
 		SplitRegExpr('[ \t]+', Lines[I], R);
 		for J := 0 to (R.Count - 1) do
 		begin
-			if (Length(R[J]) + 1 + Length(S)) > (PaperWidth - Indent) then
+			IncrAmount := 1;
+			if Length(S) = 0 then
+			begin
+				IncrAmount := 0;
+			end;
+			if (Length(R[J]) + IncrAmount + Length(S)) > (PaperWidth - Indent) then
 			begin
 				OutputStr(StringOfChar(' ', Indent) + S);
 				S := '';
@@ -319,6 +342,10 @@ begin
 		InitSectionNumber();
 		ScanSections(Node, True, Indent, Nest);
 	end
+	else if Node.NodeName = 'toc' then
+	begin
+		HaveToc := True;
+	end
 	else if Node.NodeName = 'newpage' then
 	begin
 		NewPage();
@@ -337,30 +364,11 @@ begin
 	end;
 end;
 
+procedure Render();
 begin
 	LineN := 0;
 	PageN := 0;
-
-	if not(ParamCount = 1) then
-	begin
-		WriteLn('Invalid arguments');
-		Halt(1);
-	end;
-
-	if not(FileExists(ParamStr(1))) then
-	begin
-		WriteLn('File does not exist');
-		Halt(1);
-	end;
-
-	ReadXMLFile(Src, ParamStr(1));
-	ErrCount := Validate();
-	if ErrCount > 0 then
-	begin
-		WriteLn(StdErr, IntToStr(ErrCount) + ' error(s)');
-		Halt(1);
-	end;
-
+	Buffer := '';
 	TempNode := Src.DocumentElement.FirstChild;
 	FirstTime := True;
 	while Assigned(TempNode) do
@@ -423,6 +431,80 @@ begin
 	begin
 		NewPage(False);
 	end;
+end;
 
+function CountNumbered(Root : TDOMNode; DoCount : Boolean; Base : Integer) : Integer;
+var
+	Child : TDOMNode;
+begin
+	CountNumbered := 0;
+	Child := Root.FirstChild;
+	while Assigned(Child) do
+	begin
+		if Child.NodeName = 'numbered' then
+		begin
+			CountNumbered := CountNumbered + CountNumbered(Child, True, CountNumbered);
+		end
+		else if (Child.NodeName = 'section') and DoCount then
+		begin
+			CountNumbered := CountNumbered + CountNumbered(Child, True, CountNumbered);
+			Inc(CountNumbered);
+		end;
+		Child := Child.NextSibling;
+	end;
+end;
+
+begin
+	HaveToc := False;
+
+	if not(ParamCount = 1) then
+	begin
+		WriteLn('Invalid arguments');
+		Halt(1);
+	end;
+
+	if not(FileExists(ParamStr(1))) then
+	begin
+		WriteLn('File does not exist');
+		Halt(1);
+	end;
+
+	ReadXMLFile(Src, ParamStr(1));
+	ErrCount := Validate();
+	if ErrCount > 0 then
+	begin
+		WriteLn(StdErr, IntToStr(ErrCount) + ' error(s)');
+		Halt(1);
+	end;
+	Render();
+	if HaveToc then
+	begin
+		TocNode := Src.DocumentElement.FindNode('toc');
+		
+		TempNode := Src.CreateElement('section');
+		TempContentNode := Src.CreateElement('content');
+
+		for TocCount := 1 to CountNumbered(Src.DocumentElement, False, 1) do
+		begin
+			TocPrefix := StringOfChar('#', PaperWidth - 9 - Length(IntToStr(TocCount)) - PaddingLeft);
+			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + TocPrefix + 'TOC-INDEX' + IntToStr(TocCount) + NL);
+		end;
+
+		TDOMElement(TempNode).SetAttribute('name', 'Table of Contents');
+		TempNode.AppendChild(TempContentNode);
+
+		Src.DocumentElement.InsertBefore(TempNode, TocNode);
+		Render();
+
+		for TocCount := 1 to CountNumbered(Src.DocumentElement, False, 1) do
+		begin
+			TocRegExpr := TRegExpr.Create('#+TOC-INDEX' + IntToStr(TocCount));
+			TocRegExpr.Exec(Buffer);
+			WriteLn(Length(TocRegExpr.Match[0]));
+
+			TocRegExpr.Free();
+		end;
+	end;
+	Write(Buffer);
 	Src.Free();
 end.
