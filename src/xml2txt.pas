@@ -500,7 +500,8 @@ begin
 		begin
 			TocRegExpr := TRegExpr.Create('#+TOC-INDEX' + IntToStr(TocCount));
 			TocRegExpr.Exec(Buffer);
-			WriteLn(Length(TocRegExpr.Match[0]));
+
+			Buffer := TocRegExpr.Replace(Buffer, '');
 
 			TocRegExpr.Free();
 		end;
