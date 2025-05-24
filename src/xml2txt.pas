@@ -204,7 +204,7 @@ begin
 	end;
 end;
 
-procedure Section(Node : TDOMNode; Numbered : Boolean; InitialIndent : Integer; Nest : Integer; DoList : Boolean);
+procedure Section(Node : TDOMNode; Numbered : Boolean; InitialIndent : Integer; Nest : Integer; DoList : Boolean; DoCenter : Boolean);
 var
 	Indent : Integer;
 	R : TStringList;
@@ -253,6 +253,11 @@ begin
 
 	for I := 0 to (Lines.Count - 1) do
 	begin
+		if DoCenter then
+		begin
+			OutputStr(StringOfChar(' ', Floor(PaperWidth / 2 - Length(Lines[I]) / 2)) + Lines[I]);
+			continue;
+		end;
 		S := '';
 		R := TStringList.Create();
 		SplitRegExpr('[ \t]+', Lines[I], R);
@@ -347,7 +352,7 @@ var
 	Child : TDOMNode;
 	MoreIndent : Integer;
 begin
-	if (Node.NodeName = 'section') or (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') then
+	if (Node.NodeName = 'section') or (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') or (Node.NodeName = 'center') then
 	begin
 		MoreIndent := 0;
 		if (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') then
@@ -360,7 +365,7 @@ begin
 		begin
 			if Child.NodeName = 'content' then
 			begin
-				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'list');
+				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'list', Node.NodeName = 'center');
 			end
 			else
 			begin
