@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='utf-8'?>
+<specification>
+	<author>
+		<name>Nishi</name>
+		<organization>Pyrite Development Team</organization>
+		<email>nishi@nishi.boats</email>
+	</author>
+	<meta>
+		<date>May 2025</date>
+		<title>xml2txt</title>
+		<short>XML2TXT</short>
+		<organization>Pyrite Development Team</organization>
+		<authors>Nishi</authors>
+	</meta>
+	<section name="Abstract">
+		<content>
+			Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+		</content>
+	</section>
+	<toc />
+	<numbered>
+		<section name="Introduction">
+			<section name="Background">
+				<center>
+					<content>
+						The quick brown
+						fox jumps over
+						the lazy dog
+					</content>
+				</center>
+				<content>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</content>
+				<indent-section>
+					<content>
+						Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+					</content>
+				</indent-section>
+			</section>
+			<section name="Protocol Overview">
+				<content>
+					Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+				</content>
+			</section>
+		</section>
+	</numbered>
+</specification>
