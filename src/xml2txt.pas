@@ -204,7 +204,7 @@ begin
 	end;
 end;
 
-procedure Section(Node : TDOMNode; Numbered : Boolean; InitialIndent : Integer; Nest : Integer);
+procedure Section(Node : TDOMNode; Numbered : Boolean; InitialIndent : Integer; Nest : Integer; DoList : Boolean);
 var
 	Indent : Integer;
 	R : TStringList;
@@ -213,8 +213,12 @@ var
 	J : Integer;
 	B : Boolean;
 	S : String;
+	FirstLine : Boolean;
 	IncrAmount : Integer;
+	Col : String;
 begin
+	FirstLine := True;
+
 	Indent := InitialIndent + PaddingLeft;
 
 	Lines := TStringList.Create();
@@ -261,7 +265,13 @@ begin
 			end;
 			if (Length(R[J]) + IncrAmount + Length(S)) > (PaperWidth - Indent) then
 			begin
-				OutputStr(StringOfChar(' ', Indent) + S);
+				Col := StringOfChar(' ', Indent);
+				if FirstLine and DoList then
+				begin
+					FirstLine := False;
+					Col := StringOfChar(' ', Indent - PaddingLeft) + 'o' + StringOfChar(' ', PaddingLeft - 1);
+				end;
+				OutputStr(Col + S);
 				S := '';
 			end;
 			if Length(S) = 0 then
@@ -273,7 +283,13 @@ begin
 				S := S + ' ' + R[J];
 			end;
 		end;
-		OutputStr(StringOfChar(' ', Indent) + S);
+		Col := StringOfChar(' ', Indent);
+		if FirstLine and DoList then
+		begin
+			FirstLine := False;
+			Col := StringOfChar(' ', Indent - PaddingLeft) + 'o' + StringOfChar(' ', PaddingLeft - 1);
+		end;
+		OutputStr(Col + S);
 		R.Free();
 	end;
 	OutputStr();
@@ -331,10 +347,10 @@ var
 	Child : TDOMNode;
 	MoreIndent : Integer;
 begin
-	if (Node.NodeName = 'section') or (Node.NodeName = 'indent-section') then
+	if (Node.NodeName = 'section') or (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') then
 	begin
 		MoreIndent := 0;
-		if Node.NodeName = 'indent-section' then
+		if (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') then
 		begin
 			MoreIndent := PaddingLeft;
 		end;
@@ -344,7 +360,7 @@ begin
 		begin
 			if Child.NodeName = 'content' then
 			begin
-				Section(Child, Numbered, Indent + MoreIndent, Nest);
+				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'list');
 			end
 			else
 			begin
