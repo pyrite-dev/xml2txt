@@ -102,6 +102,8 @@ begin
 end;
 
 function Validate() : Integer;
+var
+	Child : TDOMNode;
 begin
 	Validate := 0;
 	if not(Src.DocumentElement.NodeName = 'specification') then
@@ -122,31 +124,55 @@ begin
 		if not(Assigned(DateNode)) then
 		begin
 			WriteLn(StdErr, 'ERR <meta>.<date> missing');
+			Inc(Validate);
 		end;
 
 		TitleNode := MetaNode.FindNode('title');
 		if not(Assigned(TitleNode)) then
 		begin
 			WriteLn(StdErr, 'ERR <meta>.<title> missing');
+			Inc(Validate);
 		end;
 
 		ShortNode := MetaNode.FindNode('short');
 		if not(Assigned(ShortNode)) then
 		begin
 			WriteLn(StdErr, 'ERR <meta>.<short> missing');
+			Inc(Validate);
 		end;
 
 		MetaOrgNode := MetaNode.FindNode('organization');
 		if not(Assigned(MetaOrgNode)) then
 		begin
 			WriteLn(StdErr, 'ERR <meta>.<organization> missing');
+			Inc(Validate);
 		end;
 
 		AuthorsNode := MetaNode.FindNode('authors');
 		if not(Assigned(AuthorsNode)) then
 		begin
 			WriteLn(StdErr, 'ERR <meta>.<authors> missing');
+			Inc(Validate);
 		end;
+	end;
+
+	Child := Src.DocumentElement.FirstChild;
+	while Assigned(Child) do
+	begin
+		if Child.NodeName = 'author' then
+		begin
+			if not(Assigned(TDOMElement(Child).FindNode('name'))) then
+			begin
+				WriteLn(StdErr, 'ERR <author>.<name> missing');
+				Inc(Validate);
+			end;
+			if not(Assigned(TDOMElement(Child).FindNode('organization'))) then
+			begin
+				WriteLn(StdErr, 'ERR <author>.<organization> missing');
+				Inc(Validate);
+			end;
+		end;
+		Child := Child.NextSibling;
 	end;
 end;
 
@@ -381,7 +407,10 @@ begin
 
 			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(NameNode.TextContent) + NL);
 			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(OrgNode.TextContent) + NL + NL);
-			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + 'Email: ' + String(EmailNode.TextContent) + NL + NL + NL);
+			if Assigned(EmailNode) then
+			begin
+				TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + 'Email: ' + String(EmailNode.TextContent) + NL + NL + NL);
+			end;
 		end;
 		AuthorNode := AuthorNode.NextSibling;
 	end;
