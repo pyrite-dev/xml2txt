@@ -9,6 +9,13 @@ uses
 	RegExpr,
 	Classes;
 
+type
+	TNumberedSection = record
+		Location : String;
+		Section : String;
+		Page : Integer;
+	end;
+
 const
 	PaperWidth : Integer = 72;
 	PaperHeight : Integer = 58;
@@ -39,6 +46,8 @@ var
 
 	SectionN : Array[1..10] of Integer;
 
+	NumberedSection : Array of TNumberedSection;
+
 	TempNode : TDOMNode;
 	TempContentNode : TDOMNode;
 
@@ -54,10 +63,12 @@ var
 	HaveToc : Boolean;
 	
 	TocCount : Integer;
-
 	TocPrefix : String;
-
 	TocRegExpr : TRegExpr;
+	TocMaxLen : Integer;
+	TocStr : String;
+	TocEntry : String;
+	TocMaxPageLen : Integer;
 
 procedure AddLine(S : String);
 begin
@@ -289,13 +300,18 @@ var
 begin
 	SectionNumber := '';
 
-	if Numbered then
+	if Numbered and TDOMElement(Node).HasAttribute('name') then
 	begin
 		Inc(SectionN[Nest]);
 		for I := 1 to Nest do
 		begin
 			SectionNumber := SectionNumber + IntToStr(SectionN[I]) + '.';
 		end;
+		SetLength(NumberedSection, Length(NumberedSection) + 1);
+		NumberedSection[Length(NumberedSection) - 1].Location := SectionNumber;
+		NumberedSection[Length(NumberedSection) - 1].Section := String(TDOMElement(Node).GetAttribute('name'));
+		NumberedSection[Length(NumberedSection) - 1].Page := PageN + 1;
+
 		SectionNumber := SectionNumber + ' ';
 	end;
 
@@ -433,27 +449,6 @@ begin
 	end;
 end;
 
-function CountNumbered(Root : TDOMNode; DoCount : Boolean; Base : Integer) : Integer;
-var
-	Child : TDOMNode;
-begin
-	CountNumbered := 0;
-	Child := Root.FirstChild;
-	while Assigned(Child) do
-	begin
-		if Child.NodeName = 'numbered' then
-		begin
-			CountNumbered := CountNumbered + CountNumbered(Child, True, CountNumbered);
-		end
-		else if (Child.NodeName = 'section') and DoCount then
-		begin
-			CountNumbered := CountNumbered + CountNumbered(Child, True, CountNumbered);
-			Inc(CountNumbered);
-		end;
-		Child := Child.NextSibling;
-	end;
-end;
-
 begin
 	HaveToc := False;
 
@@ -476,6 +471,7 @@ begin
 		WriteLn(StdErr, IntToStr(ErrCount) + ' error(s)');
 		Halt(1);
 	end;
+	SetLength(NumberedSection, 0);
 	Render();
 	if HaveToc then
 	begin
@@ -484,24 +480,39 @@ begin
 		TempNode := Src.CreateElement('section');
 		TempContentNode := Src.CreateElement('content');
 
-		for TocCount := 1 to CountNumbered(Src.DocumentElement, False, 1) do
+		TocMaxLen := 0;
+		TocMaxPageLen := 0;
+		for TocCount := 1 to Length(NumberedSection) do
 		begin
 			TocPrefix := StringOfChar('#', PaperWidth - 9 - Length(IntToStr(TocCount)) - PaddingLeft);
 			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + TocPrefix + 'TOC-INDEX' + IntToStr(TocCount) + NL);
+			if TocMaxLen < Length(NumberedSection[TocCount - 1].Location) then
+			begin
+				TocMaxLen := Length(NumberedSection[TocCount - 1].Location);
+			end;
+			if TocMaxPageLen < Length(IntToStr(NumberedSection[TocCount - 1].Page)) then
+			begin
+				TocMaxPageLen := Length(IntToStr(NumberedSection[TocCount - 1].Page));
+			end;
 		end;
+		Inc(TocMaxLen);
 
 		TDOMElement(TempNode).SetAttribute('name', 'Table of Contents');
 		TempNode.AppendChild(TempContentNode);
 
 		Src.DocumentElement.InsertBefore(TempNode, TocNode);
+		SetLength(NumberedSection, 0);
 		Render();
 
-		for TocCount := 1 to CountNumbered(Src.DocumentElement, False, 1) do
+		for TocCount := 1 to Length(NumberedSection) do
 		begin
 			TocRegExpr := TRegExpr.Create('#+TOC-INDEX' + IntToStr(TocCount));
 			TocRegExpr.Exec(Buffer);
 
-			Buffer := TocRegExpr.Replace(Buffer, '');
+			TocEntry := NumberedSection[TocCount - 1].Location + StringOfChar(' ', TocMaxLen - Length(NumberedSection[TocCount - 1].Location)) + NumberedSection[TocCount - 1].Section;
+			TocStr := TocEntry + ' ' + Copy(ReplaceStr(StringOfChar('.', Length(TocRegExpr.Match[0])), '..', '. '), Length(TocEntry) + 1, Length(TocRegExpr.Match[0]) - Length(TocEntry) - 1 - TocMaxPageLen - 1) + ' ' + StringOfChar(' ', TocMaxPageLen - Length(IntToStr(NumberedSection[TocCount - 1].Page))) +IntToStr(NumberedSection[TocCount - 1].Page);
+
+			Buffer := TocRegExpr.Replace(Buffer, TocStr);
 
 			TocRegExpr.Free();
 		end;
