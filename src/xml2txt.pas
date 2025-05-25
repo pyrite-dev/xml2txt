@@ -360,6 +360,7 @@ begin
 			MoreIndent := PaddingLeft;
 		end;
 		Child := Node.FirstChild;
+		SectionN[Nest + 1] := 0;
 		SectionName(Node, Numbered, Indent + MoreIndent, Nest);
 		while Assigned(Child) do
 		begin
