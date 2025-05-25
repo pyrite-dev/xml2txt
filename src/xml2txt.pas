@@ -134,52 +134,52 @@ var
 	Child : TDOMNode;
 begin
 	Validate := 0;
-	if not(Src.DocumentElement.NodeName = 'specification') then
+	if not(Src.DocumentElement.NodeName = 'Specification') then
 	begin
-		WriteLn(StdErr, 'ERR Root element must be <specification>');
+		WriteLn(StdErr, 'ERR Root element must be <Specification>');
 		Inc(Validate);
 	end;
 
-	MetaNode := Src.DocumentElement.FindNode('meta');
+	MetaNode := Src.DocumentElement.FindNode('Meta');
 	if not(Assigned(MetaNode)) then
 	begin
-		WriteLn(StdErr, 'ERR <meta> missing');
+		WriteLn(StdErr, 'ERR <Meta> missing');
 		Inc(Validate);
 	end
 	else
 	begin
-		DateNode := MetaNode.FindNode('date');
+		DateNode := MetaNode.FindNode('Date');
 		if not(Assigned(DateNode)) then
 		begin
-			WriteLn(StdErr, 'ERR <meta>.<date> missing');
+			WriteLn(StdErr, 'ERR <Meta>.<Date> missing');
 			Inc(Validate);
 		end;
 
-		TitleNode := MetaNode.FindNode('title');
+		TitleNode := MetaNode.FindNode('Title');
 		if not(Assigned(TitleNode)) then
 		begin
-			WriteLn(StdErr, 'ERR <meta>.<title> missing');
+			WriteLn(StdErr, 'ERR <Meta>.<Title> missing');
 			Inc(Validate);
 		end;
 
-		ShortNode := MetaNode.FindNode('short');
+		ShortNode := MetaNode.FindNode('Short');
 		if not(Assigned(ShortNode)) then
 		begin
-			WriteLn(StdErr, 'ERR <meta>.<short> missing');
+			WriteLn(StdErr, 'ERR <Meta>.<Short> missing');
 			Inc(Validate);
 		end;
 
-		MetaOrgNode := MetaNode.FindNode('organization');
+		MetaOrgNode := MetaNode.FindNode('Organization');
 		if not(Assigned(MetaOrgNode)) then
 		begin
-			WriteLn(StdErr, 'ERR <meta>.<organization> missing');
+			WriteLn(StdErr, 'ERR <Meta>.<Organization> missing');
 			Inc(Validate);
 		end;
 
-		AuthorsNode := MetaNode.FindNode('authors');
+		AuthorsNode := MetaNode.FindNode('Authors');
 		if not(Assigned(AuthorsNode)) then
 		begin
-			WriteLn(StdErr, 'ERR <meta>.<authors> missing');
+			WriteLn(StdErr, 'ERR <Meta>.<Authors> missing');
 			Inc(Validate);
 		end;
 	end;
@@ -187,16 +187,16 @@ begin
 	Child := Src.DocumentElement.FirstChild;
 	while Assigned(Child) do
 	begin
-		if Child.NodeName = 'author' then
+		if Child.NodeName = 'Author' then
 		begin
-			if not(Assigned(TDOMElement(Child).FindNode('name'))) then
+			if not(Assigned(TDOMElement(Child).FindNode('Name'))) then
 			begin
-				WriteLn(StdErr, 'ERR <author>.<name> missing');
+				WriteLn(StdErr, 'ERR <Author>.<Name> missing');
 				Inc(Validate);
 			end;
-			if not(Assigned(TDOMElement(Child).FindNode('organization'))) then
+			if not(Assigned(TDOMElement(Child).FindNode('Organization'))) then
 			begin
-				WriteLn(StdErr, 'ERR <author>.<organization> missing');
+				WriteLn(StdErr, 'ERR <Author>.<Organization> missing');
 				Inc(Validate);
 			end;
 		end;
@@ -321,7 +321,7 @@ var
 begin
 	SectionNumber := '';
 
-	if Numbered and TDOMElement(Node).HasAttribute('name') then
+	if Numbered and TDOMElement(Node).HasAttribute('Name') then
 	begin
 		Inc(SectionN[Nest]);
 		for I := 1 to Nest do
@@ -330,19 +330,19 @@ begin
 		end;
 		SetLength(NumberedSection, Length(NumberedSection) + 1);
 		NumberedSection[Length(NumberedSection) - 1].Location := SectionNumber;
-		NumberedSection[Length(NumberedSection) - 1].Section := String(TDOMElement(Node).GetAttribute('name'));
+		NumberedSection[Length(NumberedSection) - 1].Section := String(TDOMElement(Node).GetAttribute('Name'));
 		NumberedSection[Length(NumberedSection) - 1].Page := PageN + 1;
 
 		SectionNumber := SectionNumber + ' ';
 	end;
 
-	if TDOMElement(Node).HasAttribute('name') then
+	if TDOMElement(Node).HasAttribute('Name') then
 	begin
 		if (PaperHeight - LineN) <= 5 then begin
 			NewPage();
 		end;
 
-		OutputStr(SectionNumber + String(TDOMElement(Node).GetAttribute('name')));
+		OutputStr(SectionNumber + String(TDOMElement(Node).GetAttribute('Name')));
 		OutputStr();
 	end;
 end;
@@ -352,10 +352,10 @@ var
 	Child : TDOMNode;
 	MoreIndent : Integer;
 begin
-	if (Node.NodeName = 'section') or (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') or (Node.NodeName = 'center') then
+	if (Node.NodeName = 'Section') or (Node.NodeName = 'IndentSection') or (Node.NodeName = 'List') or (Node.NodeName = 'Center') then
 	begin
 		MoreIndent := 0;
-		if (Node.NodeName = 'indent-section') or (Node.NodeName = 'list') then
+		if (Node.NodeName = 'IndentSection') or (Node.NodeName = 'List') then
 		begin
 			MoreIndent := PaddingLeft;
 		end;
@@ -363,9 +363,9 @@ begin
 		SectionName(Node, Numbered, Indent + MoreIndent, Nest);
 		while Assigned(Child) do
 		begin
-			if Child.NodeName = 'content' then
+			if Child.NodeName = 'Content' then
 			begin
-				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'list', Node.NodeName = 'center');
+				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'List', Node.NodeName = 'Center');
 			end
 			else
 			begin
@@ -374,16 +374,16 @@ begin
 			Child := Child.NextSibling;
 		end;
 	end
-	else if Node.NodeName = 'numbered' then
+	else if Node.NodeName = 'Numbered' then
 	begin
 		InitSectionNumber();
 		ScanSections(Node, True, Indent, Nest);
 	end
-	else if Node.NodeName = 'toc' then
+	else if Node.NodeName = 'TOC' then
 	begin
 		HaveToc := True;
 	end
-	else if Node.NodeName = 'newpage' then
+	else if Node.NodeName = 'NewPage' then
 	begin
 		NewPage();
 	end;
@@ -401,7 +401,7 @@ begin
 	end;
 end;
 
-procedure Render();
+procedure Render(AuthorList : Boolean);
 begin
 	LineN := 0;
 	PageN := 0;
@@ -410,7 +410,7 @@ begin
 	FirstTime := True;
 	while Assigned(TempNode) do
 	begin
-		if TempNode.NodeName = 'author' then
+		if TempNode.NodeName = 'Author' then
 		begin
 			Subtr := 0;
 			AtStr := '';
@@ -422,8 +422,8 @@ begin
 				Subtr := Length(MetaOrgNode.TextContent);
 				AtStr := String(MetaOrgNode.TextContent);
 			end;
-			NameNode := TempNode.FindNode('name');
-			OrgNode := TempNode.FindNode('organization');
+			NameNode := TempNode.FindNode('Name');
+			OrgNode := TempNode.FindNode('Organization');
 			OutputStr(AtStr + StringOfChar(' ', PaperWidth - Length(NameNode.TextContent) - Subtr) + String(NameNode.TextContent));
 			OutputStr(AtStr2 + StringOfChar(' ', PaperWidth - Length(OrgNode.TextContent) - Subtr2) + String(OrgNode.TextContent));
 		end;
@@ -435,32 +435,35 @@ begin
 	OutputStr(StringOfChar(' ', Floor(PaperWidth / 2 - Length(TitleNode.TextContent) / 2)) + String(TitleNode.TextContent));
 	OutputStr();
 
-	TempNode := Src.CreateElement('newpage');
-	Src.DocumentElement.AppendChild(TempNode);
-
-	TempNode := Src.CreateElement('section');
-	TempContentNode := Src.CreateElement('content');
-	TDOMElement(TempNode).SetAttribute('name', 'Authors'' Addresses');
-	AuthorNode := Src.DocumentElement.FirstChild;
-	while Assigned(AuthorNode) do
+	if AuthorList then
 	begin
-		if AuthorNode.NodeName = 'author' then
+		TempNode := Src.CreateElement('NewPage');
+		Src.DocumentElement.AppendChild(TempNode);
+	
+		TempNode := Src.CreateElement('Section');
+		TempContentNode := Src.CreateElement('Content');
+		TDOMElement(TempNode).SetAttribute('Name', 'Authors'' Addresses');
+		AuthorNode := Src.DocumentElement.FirstChild;
+		while Assigned(AuthorNode) do
 		begin
-			NameNode := AuthorNode.FindNode('name');
-			OrgNode := AuthorNode.FindNode('organization');
-			EmailNode := AuthorNode.FindNode('email');
-
-			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(NameNode.TextContent) + NL);
-			TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(OrgNode.TextContent) + NL + NL);
-			if Assigned(EmailNode) then
+			if AuthorNode.NodeName = 'Author' then
 			begin
-				TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + 'Email: ' + String(EmailNode.TextContent) + NL + NL + NL);
+				NameNode := AuthorNode.FindNode('Name');
+				OrgNode := AuthorNode.FindNode('Organization');
+				EmailNode := AuthorNode.FindNode('Email');
+	
+				TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(NameNode.TextContent) + NL);
+				TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + String(OrgNode.TextContent) + NL + NL);
+				if Assigned(EmailNode) then
+				begin
+					TempContentNode.TextContent := UnicodeString(String(TempContentNode.TextContent) + 'Email: ' + String(EmailNode.TextContent) + NL + NL + NL);
+				end;
 			end;
+			AuthorNode := AuthorNode.NextSibling;
 		end;
-		AuthorNode := AuthorNode.NextSibling;
+		TempNode.AppendChild(TempContentNode);
+		Src.DocumentElement.AppendChild(TempNode);
 	end;
-	TempNode.AppendChild(TempContentNode);
-	Src.DocumentElement.AppendChild(TempNode);
 
 	ScanSections(Src.DocumentElement, False, 0, 1);
 
@@ -493,13 +496,14 @@ begin
 		Halt(1);
 	end;
 	SetLength(NumberedSection, 0);
-	Render();
+	Render(True);
 	if HaveToc then
 	begin
-		TocNode := Src.DocumentElement.FindNode('toc');
+
+		TocNode := Src.DocumentElement.FindNode('TOC');
 		
-		TempNode := Src.CreateElement('section');
-		TempContentNode := Src.CreateElement('content');
+		TempNode := Src.CreateElement('Section');
+		TempContentNode := Src.CreateElement('Content');
 
 		TocMaxLen := 0;
 		TocMaxPageLen := 0;
@@ -518,12 +522,12 @@ begin
 		end;
 		Inc(TocMaxLen);
 
-		TDOMElement(TempNode).SetAttribute('name', 'Table of Contents');
+		TDOMElement(TempNode).SetAttribute('Name', 'Table of Contents');
 		TempNode.AppendChild(TempContentNode);
 
 		Src.DocumentElement.InsertBefore(TempNode, TocNode);
 		SetLength(NumberedSection, 0);
-		Render();
+		Render(False);
 
 		for TocCount := 1 to Length(NumberedSection) do
 		begin
