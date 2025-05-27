@@ -530,7 +530,7 @@ begin
 		SetLength(NumberedSection, 0);
 		Render(False);
 
-		for TocCount := 1 to Length(NumberedSection) do
+		for TocCount := Length(NumberedSection) downto 1 do
 		begin
 			TocRegExpr := TRegExpr.Create('#+TOC-INDEX' + IntToStr(TocCount));
 			TocRegExpr.Exec(Buffer);
