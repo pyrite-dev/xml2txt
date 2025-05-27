@@ -216,6 +216,7 @@ var
 	FirstLine : Boolean;
 	IncrAmount : Integer;
 	Col : String;
+	MaxLen : Integer;
 begin
 	FirstLine := True;
 
@@ -228,7 +229,10 @@ begin
 	B := False;
 	for I := 0 to (R.Count - 1) do
 	begin
-		R[I] := Trim(R[I]);
+		if not(Node.NodeName = 'RawContent') then
+		begin
+			R[I] := Trim(R[I]);
+		end;
 		if Length(R[I]) > 0 then
 		begin
 			B := True;
@@ -251,11 +255,20 @@ begin
 	end;
 	R.Free();
 
+	MaxLen := 0;
+	for I := 0 to (Lines.Count - 1) do
+	begin
+		if MaxLen < Length(Lines[I]) then
+		begin
+			MaxLen := Length(Lines[I]);
+		end;
+	end;
+
 	for I := 0 to (Lines.Count - 1) do
 	begin
 		if DoCenter then
 		begin
-			OutputStr(StringOfChar(' ', Floor(PaperWidth / 2 - Length(Lines[I]) / 2)) + Lines[I]);
+			OutputStr(StringOfChar(' ', Floor(PaperWidth / 2 - MaxLen / 2)) + Lines[I]);
 			continue;
 		end;
 		S := '';
@@ -364,7 +377,7 @@ begin
 		SectionName(Node, Numbered, Indent + MoreIndent, Nest);
 		while Assigned(Child) do
 		begin
-			if Child.NodeName = 'Content' then
+			if (Child.NodeName = 'Content') or (Child.NodeName = 'RawContent') then
 			begin
 				Section(Child, Numbered, Indent + MoreIndent, Nest, Node.NodeName = 'List', Node.NodeName = 'Center');
 			end
