@@ -229,7 +229,11 @@ begin
 	B := False;
 	for I := 0 to (R.Count - 1) do
 	begin
-		if not(Node.NodeName = 'RawContent') then
+		if Node.NodeName = 'RawContent' then
+		begin
+			R[I] := TrimRight(R[I]);
+		end
+		else
 		begin
 			R[I] := Trim(R[I]);
 		end;
