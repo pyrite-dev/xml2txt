@@ -1,0 +1,36 @@
+<!ENTITY % Component "TOC|Section|Center|IndentSection|List">
+<!ENTITY % Content "Content|RawContent">
+
+<!ELEMENT Specification ((Author)+,Meta,(%Component;|Numbered)+)>
+
+<!ELEMENT Author (Name|Organization|Email)+>
+<!ELEMENT Name (#PCDATA)>
+<!ELEMENT Organization (#PCDATA)>
+<!ELEMENT Email (#PCDATA)>
+
+<!ELEMENT Meta (Date|Title|Short|Organization|Authors)+>
+<!ELEMENT Date (#PCDATA)>
+<!ELEMENT Title (#PCDATA)>
+<!ELEMENT Short (#PCDATA)>
+<!ELEMENT Authors (#PCDATA)>
+
+<!ELEMENT TOC EMPTY>
+
+<!ELEMENT Section (%Component;|%Content;)+>
+<!ATTLIST Section
+	Name CDATA #REQUIRED
+>
+
+<!ELEMENT IndentSection (%Component;|%Content;)+>
+<!ATTLIST IndentSection
+	Name CDATA #IMPLIED
+>
+
+<!ELEMENT Content (#PCDATA)>
+<!ELEMENT RawContent (#PCDATA)>
+
+<!ELEMENT Center (%Component;|%Content;)+>
+
+<!ELEMENT List (%Component;|%Content;)+>
+
+<!ELEMENT Numbered (%Component;)+>
